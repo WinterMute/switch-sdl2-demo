@@ -9,6 +9,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_image.h>
+#include <unistd.h>
+
 #ifdef __SWITCH__
 #include <switch.h>
 #endif
@@ -35,6 +37,10 @@ int main(int argc, char** argv) {
     int exit_requested = 0;
     int trail = 0;
     int wait = 25;
+
+    Result rc = romfsInit();
+    if (!R_FAILED(rc))
+        chdir("romfs:/");
 
     SDL_Texture *switchlogo_tex = NULL, *sdllogo_tex =  NULL;
     SDL_Rect pos = { 0, 0, 0, 0 }, sdl_pos = { 0, 0, 0, 0 };
@@ -70,7 +76,7 @@ int main(int argc, char** argv) {
 #endif
 
     SDL_Window* window = SDL_CreateWindow("sdl2+mixer+image demo", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_W, SCREEN_H, SDL_WINDOW_SHOWN);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
     // load logos from file
     SDL_Surface *sdllogo = IMG_Load("data/sdl.png");
@@ -221,6 +227,7 @@ int main(int argc, char** argv) {
     Mix_CloseAudio();
     Mix_Quit();
     SDL_Quit();
+    romfsExit();
 
     return 0;
 }
